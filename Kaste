@@ -1,0 +1,112 @@
+import tkinter as tk
+import random
+from math import cos, sin
+
+class LoveApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Kaste")
+        
+        # kanva
+        self.canvas = tk.Canvas(root, width=600, height=400, bg='lightblue')
+        self.canvas.pack()
+
+        # Kastīte skaistā krāsā
+        self.box = self.canvas.create_rectangle(250, 300, 350, 350, fill="violet")
+
+        # Uzraksts "Es tevi mīlu!"
+        self.label = tk.Label(root, text="", font=("Helvetica", 24), fg="red")
+        self.label.pack(pady=10)
+
+        # Teksts "Uzspied mani!"
+        self.start_button = tk.Button(root, text="Uzspied mani!", command=self.start_action)
+        self.start_button.pack(pady=10)
+
+        self.hearts = []
+        self.flowers = []
+        self.running = False
+
+        # Sirsniņu krāsas
+        self.heart_colors = ["#FF69B4", "#FF0000", "#8B0000"]  # Rozā, sarkanā, tumši sarkanā
+
+    def start_action(self):
+        if not self.running:
+            self.running = True
+            self.label.config(text="Es tevi mīlu!")  # jo tā ir, es tevi ļoti mīlu.
+            self.animate_hearts()
+            self.animate_flowers()
+
+    def animate_hearts(self):
+        if self.running:
+            # Jauna sirsniņa ar krāsu
+            x = random.randint(260, 340)
+            color = random.choice(self.heart_colors)
+            heart = self.draw_heart(x, 300, color)
+            self.hearts.append(heart)
+            
+            # sirsniņu kustība
+            for heart in self.hearts:
+                self.move_heart(heart, 0, -2)
+                coords = self.canvas.coords(heart[0])
+                if coords[1] < -10:
+                    for part in heart:
+                        self.canvas.delete(part)
+                    self.hearts.remove(heart)
+
+            # izsaukt 50milliisekundes
+            self.root.after(50, self.animate_hearts)
+
+    def draw_heart(self, x, y, color):
+        # sirsniņaaa
+        size = 10
+        left_circle = self.canvas.create_oval(x - size, y - size, x, y, fill=color, outline=color)
+        right_circle = self.canvas.create_oval(x, y - size, x + size, y, fill=color, outline=color)
+        triangle = self.canvas.create_polygon(x - size, y, x + size, y, x, y + size * 2, fill=color, outline=color)
+        return left_circle, right_circle, triangle
+
+    def move_heart(self, heart, dx, dy):
+        for part in heart:
+            self.canvas.move(part, dx, dy)
+
+    def draw_flower(self, x, y):
+        # puķu lapiņu krāsiņas
+        petal_size = 5
+        petal_colors = ["#FFA07A", "#FFB6C1", "#FFD700", "#FF6347", "#DB7093"]  # Dažādas krāsas
+        petals = []
+        for i in range(5):
+            angle = 2 * 3.14 * i / 5
+            x_offset = petal_size * 2 * cos(angle)
+            y_offset = petal_size * 2 * sin(angle)
+            petal = self.canvas.create_oval(x + x_offset - petal_size, y + y_offset - petal_size, 
+                                            x + x_offset + petal_size, y + y_offset + petal_size, 
+                                            fill=random.choice(petal_colors), outline="")
+            petals.append(petal)
+        return petals
+
+    def animate_flowers(self):
+        if self.running:
+            # puķu ziedi
+            x = random.randint(0, 600)
+            flower = self.draw_flower(x, 0)
+            self.flowers.append(flower)
+            
+            # ziedu kustība
+            for flower in self.flowers:
+                self.move_flower(flower, 0, 2)
+                coords = self.canvas.coords(flower[0])
+                if coords[1] > 400:
+                    for petal in flower:
+                        self.canvas.delete(petal)
+                    self.flowers.remove(flower)
+
+            # milisekundītes
+            self.root.after(50, self.animate_flowers)
+
+    def move_flower(self, flower, dx, dy):
+        for petal in flower:
+            self.canvas.move(petal, dx, dy)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = LoveApp(root)
+    root.mainloop()
